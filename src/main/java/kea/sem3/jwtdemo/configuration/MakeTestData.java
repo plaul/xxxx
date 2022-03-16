@@ -2,7 +2,8 @@ package kea.sem3.jwtdemo.configuration;
 
 import kea.sem3.jwtdemo.entity.*;
 import kea.sem3.jwtdemo.repositories.CarRepository;
-import kea.sem3.jwtdemo.repositories.MemberRespository;
+import kea.sem3.jwtdemo.repositories.MemberRepository;
+import kea.sem3.jwtdemo.repositories.ReservationRepository;
 import kea.sem3.jwtdemo.security.UserRepository;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -18,13 +19,15 @@ public class MakeTestData implements ApplicationRunner {
 
 
     UserRepository userRepository;
-    MemberRespository memberRespository;
+    MemberRepository memberRepository;
     CarRepository carRepository;
+    ReservationRepository reservationRepository;
 
-    public MakeTestData(UserRepository userRepository, MemberRespository memberRespository, CarRepository carRepository) {
+    public MakeTestData(UserRepository userRepository, MemberRepository memberRepository, CarRepository carRepository, ReservationRepository reservationRepository) {
         this.userRepository = userRepository;
-        this.memberRespository = memberRespository;
+        this.memberRepository = memberRepository;
         this.carRepository = carRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public  void makePlainUsers(){
@@ -41,15 +44,37 @@ public class MakeTestData implements ApplicationRunner {
         userRepository.save(both);
 
 
-        memberRespository.save(new Member("KW","kw@a.dk","test12","Kurt","Wonnegut","Lyngbyvje 34","Lyngby","2800"));
-        memberRespository.save(new Member("HW","hw@a.dk","test12","Hanne","Wonnegut","Lyngbyvje 34","Lyngby","2800"));
+        Member m1 = new Member("kw","kw@a.dk","test12","Kurt","Wonnegut","Lyngbyvje 34","Lyngby","2800");
+        m1.addRole(Role.USER);
+        Member m2 = new Member("hw","hw@a.dk","test12","Hanne","Wonnegut","Lyngbyvje 34","Lyngby","2800");
+        m2.addRole(Role.USER);
+        memberRepository.save(m1);
+        memberRepository.save(m2);
 
-        carRepository.save(new Car("Volvo", "C40", 560,10));
+        Car carVolvo = carRepository.save(new Car("Volvo", "C40", 560,10));
         carRepository.save(new Car("Volvo", "V70", 500,10));
         carRepository.save(new Car("Volvo", "V49", 400,10));
         carRepository.save(new Car("Suzuki", "Vitara", 500,14));
         carRepository.save(new Car("Suzuki", "Vitara", 500,14));
         carRepository.save(new Car("Suzuki", "S-Cross", 500,14));
+
+        //Create a Reservation
+        Reservation res1 = new Reservation(LocalDate.of(2022,3,1),carVolvo,m1);
+        reservationRepository.save(res1);
+        Reservation res = reservationRepository.
+                findReservationByReservedCar_IdAndRentalDate(carVolvo.getId(),(LocalDate.of(2022,3,1)));
+        if(res == null) {
+
+            Reservation res2 = new Reservation(LocalDate.of(2022, 3, 1), carVolvo, m2);
+            reservationRepository.save(res2);
+        } else{
+            System.out.println("Car is reserved this day");
+        }
+
+
+
+
+        System.out.println(carVolvo.getReservations().size());
 
         System.out.println("########################################################################################");
         System.out.println("########################################################################################");

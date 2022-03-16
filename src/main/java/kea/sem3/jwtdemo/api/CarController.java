@@ -6,8 +6,10 @@ import kea.sem3.jwtdemo.entity.Car;
 import kea.sem3.jwtdemo.service.CarService;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.security.RolesAllowed;
 import java.util.List;
 
+@CrossOrigin
 @RestController
 @RequestMapping("api/cars")
 public class CarController {
@@ -28,14 +30,25 @@ public class CarController {
     }
 
     @PostMapping
+    @RolesAllowed("ADMIN")
     public CarResponse addCar(@RequestBody CarRequest body){
-       return carService.addCar(body);
+        return carService.addCar(body);
     }
 
     @PutMapping("/{id}")
-    public CarResponse editCar(@RequestBody CarRequest body, @PathVariable int id){return null;}
+    @RolesAllowed("ADMIN")
+    public CarResponse editCar(@RequestBody CarRequest body, @PathVariable int id){
+        return carService.editCar(body,id);
+    }
+
+    @PatchMapping ("/{id}/{newprice}")
+    @RolesAllowed("ADMIN")
+    public void editPrice(@PathVariable int id,@PathVariable double newprice) throws Exception {
+        carService.updatePrice(id,newprice);
+    }
 
     @DeleteMapping("/{id}")
+    @RolesAllowed("ADMIN")
     public void deleteCar(@PathVariable int id){}
 
 }
